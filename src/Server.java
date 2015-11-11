@@ -16,9 +16,13 @@ public class Server {
 		users = new ArrayList<User>();
 	}
 	
-	public void startServer() throws IOException {
+	private void startServer() throws IOException {
 		setRunning();
 		serverSocket = new ServerSocket(port);
+	}
+	
+	public void run() throws IOException {
+		startServer();
 		while(isRunning()) {
 			final Socket clientSocket = serverSocket.accept();
 			new UserClient(this, clientSocket).run();
@@ -28,7 +32,7 @@ public class Server {
 	
 	private synchronized void setRunning() {
 		if(isRunning()) {
-			
+			throw new IllegalStateException("Already running");
 		}
 		isRunning = true;
 	}
