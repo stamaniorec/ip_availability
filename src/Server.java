@@ -1,6 +1,9 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class Server {
@@ -9,8 +12,21 @@ public class Server {
 	private ServerSocket serverSocket;
 	private boolean isRunning;
 	
+	private Set<String> currentlyLoggedUsers;
+	private HashMap<String, Integer> usersToLoginCount;
+	
+	public Set<String> getCurrentlyLoggedUsers() {
+		return currentlyLoggedUsers;
+	}
+	
+	public HashMap<String, Integer> getUsersToLoginCount() {
+		return usersToLoginCount;
+	}
+	
 	public Server(int port) {
 		this.port = port;
+		currentlyLoggedUsers = new HashSet<String>();
+		usersToLoginCount = new HashMap<String, Integer>();
 	}
 	
 	public void startServer() throws IOException {
@@ -18,7 +34,7 @@ public class Server {
 		serverSocket = new ServerSocket(port);
 		while(isRunning()) {
 			final Socket clientSocket = serverSocket.accept();
-			new UserClient(clientSocket).run();
+			new UserClient(this, clientSocket).run();
 		}
 		stopServer();
 	}
