@@ -41,10 +41,13 @@ public class Server {
 		serverSocket.close();
 	}
 	
-	public void loginUser(User user) {
-		System.out.println(user.getUsername());
-		if(!users.contains(user)) users.add(user);
-		user.login();
+	public ArrayList<User> getUsers() { return users; }
+	public User getUser(String username) {
+		for(User user : users) {
+//			System.out.println(user.getUsername() + " == " + username + " -> " + (user.getUsername() == username));
+			if(user.getUsername().equals(username))
+				return user;
+		}
+		return null;
 	}
-
 }

@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
@@ -30,11 +31,11 @@ public class UserClient {
 				if("login".equals(arr[1])) {
 					out.println(login(arr));
 				} else if("logout".equals(arr[1])) {
-//					out.println(logout(arr));
+					out.println(logout(arr));
 				} else if("info".equals(arr[1])) {
-//					out.println(info(arr));
+					out.println(info(arr));
 				} else if("listavailable".equals(arr[1])) {
-//					out.println(listavailable(arr));
+					out.println(listavailable(arr));
 				} else if("shutdown".equals(arr[1])) {
 //					String output = shutdown(arr);
 //					if("ok".equals(output)) {
@@ -56,48 +57,50 @@ public class UserClient {
 	
 	public String login(String[] args) {
 		String username = args[0];
-		User user = new User(username);
+		User user = server.getUser(username);
+		if(user == null) {
+			user = new User(username);
+			server.getUsers().add(user);
+		}
+		user.login();
 		this.user = user;
-		server.loginUser(user);
-		user.setLoginCount(user.getLoginCount() + 1);
 		return "ok";
 	}
 	
-//	public String logout(String[] args) {
-//		String username = args[0];
-//		return server.getCurrentlyLoggedUsers().remove(username) ? "ok" : "error:notlogged";
-//	}
-//	
-//	public String info(String[] args) {
-//		String username = args[0];
-//		String username2 = args[2];
-//		if(server.getCurrentlyLoggedUsers().contains(username)) {
-//			String result = "ok:";
-//			result += (username2 + ":");
-//			result += (server.getCurrentlyLoggedUsers().contains(username2) + ":");
-//			int count = 0;
-//			if(server.getUsersToLoginCount().containsKey(username2)) {
-//				count = server.getUsersToLoginCount().get(username2);
-//			}
-//			result += count;
-//			return result;
-//		} else {
-//			return "error:notlogged";
-//		}
-//	}
-//	
-//	public String listavailable(String[] args) {
-//		String username = args[0];
-//		if(server.getCurrentlyLoggedUsers().contains(username)) {
-//			String result = "ok";
-//			for(String user : server.getCurrentlyLoggedUsers()) {
-//				result += (":" + user);
-//			}
-//			return result;
-//		} else {
-//			return "error:notlogged";
-//		}
-//	}
+	public String logout(String[] args) {
+		String username = args[0];
+		User user = server.getUser(username);
+		if(!user.isLoggedin()) return "error:notlogged";
+		user.logout();
+		return "ok";
+	}
+	
+	public String info(String[] args) {
+		String username = args[0];
+		String username2 = args[2];
+		User executer = server.getUser(username);
+		User target = server.getUser(username2);
+		if(executer != null && executer.isLoggedin() && target != null) {
+			String result = "ok:";
+			result += (target.getUsername() + ":");
+			result += (target.isLoggedin() + ":");
+			result += (target.getLoginCount());
+			return result;
+		} else {
+			return "error:notlogged";
+		}
+	}
+
+	public String listavailable(String[] args) {
+		String username = args[0];
+		if(server.getUser(username) == null)
+			return "error:notlogged";
+		String result = "ok";
+		for(User user : server.getUsers()) {
+			if(user.isLoggedin()) result += (":" + user.getUsername());
+		}
+		return result;
+	}
 //	
 //	public String shutdown(String[] args) {
 //		String username = args[0];

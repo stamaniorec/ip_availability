@@ -11,8 +11,9 @@ public class User {
 		loginCount = 0;
 	}
 	
-	public void login() { isLoggedIn = true; }
+	public void login() { isLoggedIn = true; ++loginCount;}
 	public void logout() { isLoggedIn = false; }
+	public boolean isLoggedin() { return isLoggedIn; }
 	public int getLoginCount() { return loginCount; }
 	public void setLoginCount(int loginCount) { this.loginCount = loginCount; }
 	public String getUsername() { return username; }
