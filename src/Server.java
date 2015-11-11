@@ -18,8 +18,7 @@ public class Server {
 		serverSocket = new ServerSocket(port);
 		while(isRunning()) {
 			final Socket clientSocket = serverSocket.accept();
-			//TODO handle client
-			clientSocket.close();
+			new UserClient(clientSocket).run();
 		}
 		stopServer();
 	}
