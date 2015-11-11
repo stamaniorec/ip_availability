@@ -5,10 +5,16 @@ public class User {
 	private boolean isLoggedIn;
 	private int loginCount;
 	
-	public User(String username, boolean isLoggedIn) {
+	public User(String username) {
 		this.username = username;
-		this.isLoggedIn = isLoggedIn;
+		isLoggedIn = false;
 		loginCount = 0;
 	}
+	
+	public void login() { isLoggedIn = true; }
+	public void logout() { isLoggedIn = false; }
+	public int getLoginCount() { return loginCount; }
+	public void setLoginCount(int loginCount) { this.loginCount = loginCount; }
+	public String getUsername() { return username; }
 	
 }
