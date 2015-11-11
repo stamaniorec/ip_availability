@@ -37,12 +37,13 @@ public class UserClient {
 				} else if("listavailable".equals(arr[1])) {
 					out.println(listavailable(arr));
 				} else if("shutdown".equals(arr[1])) {
-//					String output = shutdown(arr);
-//					if("ok".equals(output)) {
-//						break;
-//					} else {
-//						out.println(output);
-//					}
+					String output = shutdown(arr);
+					if("ok".equals(output)) {
+						server.stopRunning();
+						break;
+					} else {
+						out.println(output);
+					}
 				} else {
 					out.println("error:unknowncommand");
 				}
@@ -53,6 +54,7 @@ public class UserClient {
 		
 		in.close();
 		out.close();
+
 	}
 	
 	public String login(String[] args) {
@@ -101,14 +103,13 @@ public class UserClient {
 		}
 		return result;
 	}
-//	
-//	public String shutdown(String[] args) {
-//		String username = args[0];
-//		if(server.getCurrentlyLoggedUsers().contains(username)) {
-//			return "ok";
-//		} else {
-//			return "error:notlogged";
-//		}
-//	}
+	
+	public String shutdown(String[] args) {
+		String username = args[0];
+		if(server.getUser(username) != null)
+			return "ok";
+		else
+			return "error:notlogged";
+	}
 	
 }

@@ -28,13 +28,20 @@ public class Server {
 	
 	private synchronized void setRunning() {
 		if(isRunning()) {
-			throw new IllegalStateException("Already running");
+			
 		}
 		isRunning = true;
 	}
 	
 	private synchronized boolean isRunning() {
 		return isRunning;
+	}
+	
+	public synchronized void stopRunning() {
+		if(!isRunning()) {
+			throw new IllegalStateException("Already stopped running");
+		}
+		isRunning = false;
 	}
 
 	public synchronized void stopServer() throws IOException {
@@ -44,7 +51,6 @@ public class Server {
 	public ArrayList<User> getUsers() { return users; }
 	public User getUser(String username) {
 		for(User user : users) {
-//			System.out.println(user.getUsername() + " == " + username + " -> " + (user.getUsername() == username));
 			if(user.getUsername().equals(username))
 				return user;
 		}
