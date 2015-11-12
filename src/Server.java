@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,6 +12,7 @@ public class Server {
 	private boolean isRunning;
 	
 	private Map<String, User> users;
+	private ArrayList<Socket> clientSockets;
 	
 	public Server(int port) {
 		this.port = port;
@@ -20,6 +22,7 @@ public class Server {
 	private void startServer() throws IOException {
 		setRunning();
 		serverSocket = new ServerSocket(port);
+		clientSockets = new ArrayList<Socket>();
 	}
 	
 	public void run() throws IOException {
@@ -27,6 +30,7 @@ public class Server {
 		while(isRunning()) {
 			final Socket clientSocket = serverSocket.accept();
 			new UserClient(this, clientSocket).run();
+			clientSockets.add(clientSocket);
 		}
 		stopServer();
 	}
@@ -50,6 +54,9 @@ public class Server {
 	}
 
 	public synchronized void stopServer() throws IOException {
+		for(Socket clientSocket : clientSockets) {
+			clientSocket.close();
+		}
 		serverSocket.close();
 	}
 	
