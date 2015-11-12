@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Date;
 
 
 public class User {
@@ -15,11 +16,21 @@ public class User {
 		session_times = new ArrayList<Interval>();
 	}
 	
-	public void login() { isLoggedIn = true; ++loginCount;}
-	public void logout() { isLoggedIn = false; }
+	public void login() {
+		isLoggedIn = true; 
+		++loginCount;
+		session_times.add(new Interval(new Date()));
+	}
+	
+	public void logout() {
+		isLoggedIn = false;
+		session_times.get(session_times.size()-1).setTo(new Date());
+	}
+	
 	public boolean isLoggedin() { return isLoggedIn; }
 	public int getLoginCount() { return loginCount; }
 	public void setLoginCount(int loginCount) { this.loginCount = loginCount; }
 	public String getUsername() { return username; }
+	public ArrayList<Interval> getSessionTimes() { return session_times; }
 	
 }

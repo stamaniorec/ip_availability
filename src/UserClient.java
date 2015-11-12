@@ -67,7 +67,7 @@ public class UserClient {
 			user = new User(username);
 			server.getUsers().put(username, user);
 		}
-		user.login();
+		if(!user.isLoggedin()) user.login();
 		this.user = user;
 		return "ok";
 	}
@@ -92,6 +92,12 @@ public class UserClient {
 			result += (target.getUsername() + ":");
 			result += (target.isLoggedin() + ":");
 			result += (target.getLoginCount());
+			for(Interval i : target.getSessionTimes()) {
+				result += (":" + i.from());
+				if(i.to() != null) {
+					result += (":" + i.to());
+				}
+			}
 			return result;
 		} else {
 			return "error:notlogged";
