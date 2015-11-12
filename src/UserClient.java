@@ -67,7 +67,13 @@ public class UserClient {
 			user = new User(username);
 			server.getUsers().put(username, user);
 		}
-		if(!user.isLoggedin()) user.login();
+		if(user != this.user) {
+			if(this.user != null) logout(new String[]{ this.user.getUsername() });
+			user.login();
+		} else {
+			// multithreading - close the other connection
+			// and user.login();
+		}
 		this.user = user;
 		return "ok";
 	}
