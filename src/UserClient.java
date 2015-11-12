@@ -57,7 +57,7 @@ public class UserClient {
 		
 		in.close();
 		out.close();
-
+		logout(new String[0]);
 	}
 	
 	public String login(String[] args) {
