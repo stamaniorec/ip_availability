@@ -87,8 +87,8 @@ public class UserClient {
 		}
 		String username = args[1];
 		User target = server.getUser(username);
+		String result = "ok:";
 		if(target != null) {
-			String result = "ok:";
 			result += (target.getUsername() + ":");
 			result += (target.isLoggedin() + ":");
 			result += (target.getLoginCount());
@@ -98,10 +98,10 @@ public class UserClient {
 					result += (":" + i.to());
 				}
 			}
-			return result;
 		} else {
-			return "error:notlogged";
+			result += (username + ":false:0");
 		}
+		return result;
 	}
 
 	public String listavailable(String[] args) {
