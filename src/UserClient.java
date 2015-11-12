@@ -27,15 +27,19 @@ public class UserClient {
 			
 			String[] arr = line.split(":");
 			if(arr.length >= 2) {
-				if("login".equals(arr[1])) {
+				if("login".equals(arr[0])) {
 					out.println(login(arr));
-				} else if("logout".equals(arr[1])) {
-					out.println(logout(arr));
-				} else if("info".equals(arr[1])) {
+				} else if("info".equals(arr[0])) {
 					out.println(info(arr));
-				} else if("listavailable".equals(arr[1])) {
+				} else {
+					out.println("error:unknowncommand");
+				}
+			} else if(arr.length == 1) {
+				if("logout".equals(arr[0])) {
+					out.println(logout(arr));
+				} else if("listavailable".equals(arr[0])) {
 					out.println(listavailable(arr));
-				} else if("shutdown".equals(arr[1])) {
+				} else if("shutdown".equals(arr[0])) {
 					String output = shutdown(arr);
 					if("ok".equals(output)) {
 						server.stopRunning();
@@ -57,7 +61,7 @@ public class UserClient {
 	}
 	
 	public String login(String[] args) {
-		String username = args[0];
+		String username = args[1];
 		User user = server.getUser(username);
 		if(user == null) {
 			user = new User(username);
@@ -69,22 +73,21 @@ public class UserClient {
 	}
 	
 	public String logout(String[] args) {
-		String username = args[0];
-		User user = server.getUser(username);
-		if(user == null) {
+		if(this.user == null) {
 			return "error:notlogged";
 		}
-		if(!user.isLoggedin()) return "error:notlogged";
 		user.logout();
+		this.user = null;
 		return "ok";
 	}
 	
 	public String info(String[] args) {
-		String username = args[0];
-		String username2 = args[2];
-		User executer = server.getUser(username);
-		User target = server.getUser(username2);
-		if(executer != null && executer.isLoggedin() && target != null) {
+		if(this.user == null) {
+			return "error:notlogged";
+		}
+		String username = args[1];
+		User target = server.getUser(username);
+		if(target != null) {
 			String result = "ok:";
 			result += (target.getUsername() + ":");
 			result += (target.isLoggedin() + ":");
@@ -96,7 +99,7 @@ public class UserClient {
 	}
 
 	public String listavailable(String[] args) {
-		String username = args[0];
+		String username = this.user.getUsername();
 		if(server.getUser(username) == null)
 			return "error:notlogged";
 		String result = "ok";
@@ -107,11 +110,10 @@ public class UserClient {
 	}
 	
 	public String shutdown(String[] args) {
-		String username = args[0];
-		if(server.getUser(username) != null)
-			return "ok";
-		else
+		if(this.user == null) {
 			return "error:notlogged";
+		}
+		return "ok";
 	}
 	
 }
