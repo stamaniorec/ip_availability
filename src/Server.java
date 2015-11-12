@@ -1,7 +1,8 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
 	
@@ -9,11 +10,11 @@ public class Server {
 	private ServerSocket serverSocket;
 	private boolean isRunning;
 	
-	private ArrayList<User> users;
+	private Map<String, User> users;
 	
 	public Server(int port) {
 		this.port = port;
-		users = new ArrayList<User>();
+		users = new HashMap<String, User>();
 	}
 	
 	private void startServer() throws IOException {
@@ -52,12 +53,7 @@ public class Server {
 		serverSocket.close();
 	}
 	
-	public ArrayList<User> getUsers() { return users; }
-	public User getUser(String username) {
-		for(User user : users) {
-			if(user.getUsername().equals(username))
-				return user;
-		}
-		return null;
-	}
+	public Map<String, User> getUsers() { return users; }
+	public User getUser(String username) { return users.get(username); }
+
 }

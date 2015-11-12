@@ -61,7 +61,7 @@ public class UserClient {
 		User user = server.getUser(username);
 		if(user == null) {
 			user = new User(username);
-			server.getUsers().add(user);
+			server.getUsers().put(username, user);
 		}
 		user.login();
 		this.user = user;
@@ -71,6 +71,9 @@ public class UserClient {
 	public String logout(String[] args) {
 		String username = args[0];
 		User user = server.getUser(username);
+		if(user == null) {
+			return "error:notlogged";
+		}
 		if(!user.isLoggedin()) return "error:notlogged";
 		user.logout();
 		return "ok";
@@ -97,7 +100,7 @@ public class UserClient {
 		if(server.getUser(username) == null)
 			return "error:notlogged";
 		String result = "ok";
-		for(User user : server.getUsers()) {
+		for(User user : server.getUsers().values()) {
 			if(user.isLoggedin()) result += (":" + user.getUsername());
 		}
 		return result;
