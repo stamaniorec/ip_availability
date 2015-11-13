@@ -15,12 +15,12 @@ public class Server {
 	private boolean isRunning;
 	
 	private Map<String, User> users;
-	private List<Socket> clientSockets;
+	private List<UserClient> clients;
 	
 	public Server(int port) {
 		this.port = port;
 		users = Collections.synchronizedMap(new HashMap<String, User>());
-		clientSockets = Collections.synchronizedList(new ArrayList<Socket>());
+		clients = Collections.synchronizedList(new ArrayList<UserClient>());
 	}
 	
 	private void startServer() throws IOException {
@@ -33,8 +33,9 @@ public class Server {
 		while(isRunning()) {
 			try {
 				final Socket clientSocket = serverSocket.accept();
-				new Thread(new UserClient(this, clientSocket)).start();
-				clientSockets.add(clientSocket);
+				UserClient client = new UserClient(this, clientSocket);
+				clients.add(client);
+				new Thread(client).start();
 			} catch(SocketException ex) { break; }
 		}
 	}
@@ -59,13 +60,15 @@ public class Server {
 	}
 
 	public synchronized void stopServer() throws IOException {
-		for(Socket clientSocket : clientSockets) {
-			if(!clientSocket.isClosed()) clientSocket.close();
+		for(UserClient client : clients) {
+			Socket s = client.getSocket();
+			if(!s.isClosed()) s.close();
 		}
 		serverSocket.close();
 	}
 	
 	public Map<String, User> getUsers() { return users; }
 	public User getUser(String username) { return users.get(username); }
+	public List<UserClient> getClients() { return clients; }
 
 }

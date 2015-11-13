@@ -46,7 +46,6 @@ public class UserClient implements Runnable {
 					} else if("shutdown".equals(arr[0])) {
 						String output = shutdown(arr);
 						if("ok".equals(output)) {
-							System.out.println("ffs stop running");
 							server.stopRunning();
 							break;
 						} else {
@@ -66,24 +65,35 @@ public class UserClient implements Runnable {
 		} finally {
 			if(in != null) in.close();
 			if(out != null) out.close();
-			logout(new String[0]);
+			logout(new String[0]); // if connection has fallen apart, logout automatically
 		}
 	}
 	
 	public synchronized String login(String[] args) {
 		String username = args[1];
 		User user = server.getUser(username);
-		if(user == null) {
+		if(user == null) { // user has never logged in
 			user = new User(username);
 			server.getUsers().put(username, user);
+		} else {
+			// Log out from other session if such user is already logged in
+			for(UserClient c : server.getClients()) {
+				if(c != this) {
+					User u = c.getUser();
+					if(u != null) {
+						if(u.getUsername().equals(user.getUsername())) {
+							c.logout(new String[]{ c.getUser().getUsername() });
+						}
+					}
+				}
+			}
 		}
-		if(user != this.user) {
+		
+		if(user != this.user) { // already logged in, logging in with a different user
 			if(this.user != null) logout(new String[]{ this.user.getUsername() });
 			user.login();
-		} else {
-			// multithreading - close the other connection
-			// and user.login();
 		}
+		
 		this.user = user;
 		return "ok";
 	}
@@ -121,9 +131,9 @@ public class UserClient implements Runnable {
 	}
 
 	public synchronized String listavailable(String[] args) {
-		String username = this.user.getUsername();
-		if(server.getUser(username) == null)
+		if(this.user == null) {
 			return "error:notlogged";
+		}
 		String result = "ok";
 		for(User user : server.getUsers().values()) {
 			if(user.isLoggedin()) result += (":" + user.getUsername());
@@ -137,5 +147,8 @@ public class UserClient implements Runnable {
 		}
 		return "ok";
 	}
+	
+	public synchronized User getUser() { return user; }
+	public Socket getSocket() { return socket; }
 	
 }
