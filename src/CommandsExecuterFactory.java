@@ -1,11 +1,11 @@
 class CommandsExecuterFactory {
-	private UserClient clientSession;
+//	private UserClient clientSession;
 
-	public CommandsExecuterFactory(UserClient clientSession) {
-		this.clientSession = clientSession;
-	}
+//	public CommandsExecuterFactory(UserClient clientSession) {
+//		this.clientSession = clientSession;
+//	}
 
-	public Command getCommand(String line) {
+	public static Command getCommand(String line, UserClient clientSession) {
 		String[] arr = line.split(":");
 		if (arr.length > 2)
 			return null;

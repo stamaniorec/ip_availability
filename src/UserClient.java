@@ -13,7 +13,7 @@ public class UserClient implements Runnable {
 	public UserClient(Server server, Socket socket) {
 		this.server = server;
 		this.socket = socket;
-		user = null;
+		this.user = null;
 	}
 	
 	@Override
@@ -29,8 +29,8 @@ public class UserClient implements Runnable {
 			while(in.hasNextLine()) {
 				String line = in.nextLine();
 				
-				CommandsExecuterFactory f = new CommandsExecuterFactory(this);
-				Command command = f.getCommand(line);
+//				CommandsExecuterFactory f = new CommandsExecuterFactory(this);
+				Command command = CommandsExecuterFactory.getCommand(line, this);
 				if(command instanceof ShutdownCommand) {
 					String output = command.execute(line.split(":"));
 					if("ok".equals(output)) {
@@ -57,8 +57,9 @@ public class UserClient implements Runnable {
 	}
 	
 	public synchronized User getUser() { return user; }
+	public void setUser(User u) { user = u; }
+	
 	public Socket getSocket() { return socket; }
 	public Server getServer() { return server; }
-	public void setUser(User u) { user = u; }
 	
 }
