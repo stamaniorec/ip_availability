@@ -4,7 +4,7 @@ import java.net.Socket;
 import java.util.Scanner;
 
 
-public class UserClient {
+public class UserClient implements Runnable {
 
 	private final Server server;
 	private final Socket socket;
@@ -16,51 +16,61 @@ public class UserClient {
 		user = null;
 	}
 	
-	public void run() throws IOException {
-		final PrintStream out = new PrintStream(socket.getOutputStream());
-		final Scanner in = new Scanner(socket.getInputStream());
-		
-		out.println("въведете команда: ");
-		
-		while(in.hasNextLine()) {
-			String line = in.nextLine();
+	@Override
+	public void run() {
+		PrintStream out = null;
+		Scanner in = null;
+		try {
+			out = new PrintStream(socket.getOutputStream());
+			in = new Scanner(socket.getInputStream());
 			
-			String[] arr = line.split(":");
-			if(arr.length >= 2) {
-				if("login".equals(arr[0])) {
-					out.println(login(arr));
-				} else if("info".equals(arr[0])) {
-					out.println(info(arr));
-				} else {
-					out.println("error:unknowncommand");
-				}
-			} else if(arr.length == 1) {
-				if("logout".equals(arr[0])) {
-					out.println(logout(arr));
-				} else if("listavailable".equals(arr[0])) {
-					out.println(listavailable(arr));
-				} else if("shutdown".equals(arr[0])) {
-					String output = shutdown(arr);
-					if("ok".equals(output)) {
-						server.stopRunning();
-						break;
+			out.println("въведете команда: ");
+			
+			while(in.hasNextLine()) {
+				String line = in.nextLine();
+				
+				String[] arr = line.split(":");
+				if(arr.length >= 2) {
+					if("login".equals(arr[0])) {
+						out.println(login(arr));
+					} else if("info".equals(arr[0])) {
+						out.println(info(arr));
 					} else {
-						out.println(output);
+						out.println("error:unknowncommand");
+					}
+				} else if(arr.length == 1) {
+					if("logout".equals(arr[0])) {
+						out.println(logout(arr));
+					} else if("listavailable".equals(arr[0])) {
+						out.println(listavailable(arr));
+					} else if("shutdown".equals(arr[0])) {
+						String output = shutdown(arr);
+						if("ok".equals(output)) {
+							System.out.println("ffs stop running");
+							server.stopRunning();
+							break;
+						} else {
+							out.println(output);
+						}
+					} else {
+						out.println("error:unknowncommand");
 					}
 				} else {
 					out.println("error:unknowncommand");
 				}
-			} else {
-				out.println("error:unknowncommand");
 			}
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if(in != null) in.close();
+			if(out != null) out.close();
+			logout(new String[0]);
 		}
-		
-		in.close();
-		out.close();
-		logout(new String[0]);
 	}
 	
-	public String login(String[] args) {
+	public synchronized String login(String[] args) {
 		String username = args[1];
 		User user = server.getUser(username);
 		if(user == null) {
@@ -78,7 +88,7 @@ public class UserClient {
 		return "ok";
 	}
 	
-	public String logout(String[] args) {
+	public synchronized String logout(String[] args) {
 		if(this.user == null) {
 			return "error:notlogged";
 		}
@@ -87,7 +97,7 @@ public class UserClient {
 		return "ok";
 	}
 	
-	public String info(String[] args) {
+	public synchronized String info(String[] args) {
 		if(this.user == null) {
 			return "error:notlogged";
 		}
@@ -110,7 +120,7 @@ public class UserClient {
 		return result;
 	}
 
-	public String listavailable(String[] args) {
+	public synchronized String listavailable(String[] args) {
 		String username = this.user.getUsername();
 		if(server.getUser(username) == null)
 			return "error:notlogged";
@@ -121,7 +131,7 @@ public class UserClient {
 		return result;
 	}
 	
-	public String shutdown(String[] args) {
+	public synchronized String shutdown(String[] args) {
 		if(this.user == null) {
 			return "error:notlogged";
 		}

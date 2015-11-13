@@ -1,8 +1,11 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Server {
@@ -12,27 +15,28 @@ public class Server {
 	private boolean isRunning;
 	
 	private Map<String, User> users;
-	private ArrayList<Socket> clientSockets;
+	private List<Socket> clientSockets;
 	
 	public Server(int port) {
 		this.port = port;
-		users = new HashMap<String, User>();
+		users = Collections.synchronizedMap(new HashMap<String, User>());
+		clientSockets = Collections.synchronizedList(new ArrayList<Socket>());
 	}
 	
 	private void startServer() throws IOException {
 		setRunning();
 		serverSocket = new ServerSocket(port);
-		clientSockets = new ArrayList<Socket>();
 	}
 	
 	public void run() throws IOException {
 		startServer();
 		while(isRunning()) {
-			final Socket clientSocket = serverSocket.accept();
-			new UserClient(this, clientSocket).run();
-			clientSockets.add(clientSocket);
+			try {
+				final Socket clientSocket = serverSocket.accept();
+				new Thread(new UserClient(this, clientSocket)).start();
+				clientSockets.add(clientSocket);
+			} catch(SocketException ex) { break; }
 		}
-		stopServer();
 	}
 	
 	private synchronized void setRunning() {
@@ -46,16 +50,17 @@ public class Server {
 		return isRunning;
 	}
 	
-	public synchronized void stopRunning() {
+	public synchronized void stopRunning() throws IOException {
 		if(!isRunning()) {
 			throw new IllegalStateException("Already stopped running");
 		}
 		isRunning = false;
+		stopServer();
 	}
 
 	public synchronized void stopServer() throws IOException {
 		for(Socket clientSocket : clientSockets) {
-			clientSocket.close();
+			if(!clientSocket.isClosed()) clientSocket.close();
 		}
 		serverSocket.close();
 	}
