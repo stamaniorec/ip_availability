@@ -43,6 +43,8 @@ public class UserClient implements Runnable {
 						out.println(logout(arr));
 					} else if("listavailable".equals(arr[0])) {
 						out.println(listavailable(arr));
+					} else if("listabsent".equals(arr[0])) {
+						out.println(listabsent(arr));
 					} else if("shutdown".equals(arr[0])) {
 						String output = shutdown(arr);
 						if("ok".equals(output)) {
@@ -137,6 +139,17 @@ public class UserClient implements Runnable {
 		String result = "ok";
 		for(User user : server.getUsers().values()) {
 			if(user.isLoggedin()) result += (":" + user.getUsername());
+		}
+		return result;
+	}
+	
+	public synchronized String listabsent(String[] args) {
+		if(this.user == null) {
+			return "error:notlogged";
+		}
+		String result = "ok";
+		for(User user : server.getUsers().values()) {
+			if(!user.isLoggedin()) result += (":" + user.getUsername());
 		}
 		return result;
 	}
