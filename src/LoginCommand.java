@@ -1,38 +1,40 @@
 
 class LoginCommand extends Command {
+	Server server;
+	User currentSessionUser;
+	
 	public LoginCommand(UserClient clientSession) {
 		super(clientSession);
+		server = clientSession.getServer();
+		currentSessionUser = clientSession.getUser();
 	}
+	
 	@Override
 	public String execute(String[] args) {
 		String username = args[1];
-		Server server = clientSession.getServer();
-		User user1 = clientSession.getUser();
-		User user = server.getUser(username);
-		if(user == null) { // user has never logged in
-			user = new User(username);
-			server.getUsers().put(username, user);
+		User userToLogin = server.getUser(username);
+		if(userToLogin == null) {
+			userToLogin = new User(username);
+			server.getUsers().put(username, userToLogin);
 		} else {
-			// Log out from other session if such user is already logged in
-			for(UserClient c : server.getClients()) {
-				if(c != clientSession) {
-					User u = c.getUser();
-					if(u != null) {
-						if(u.getUsername().equals(user.getUsername())) {
-							new LogoutCommand(c).execute(new String[0]);
-						}
-					}
+			logoutFromOtherSessions(userToLogin.getUsername());			
+		}
+		if(userToLogin != currentSessionUser) {
+			new LogoutCommand(clientSession).execute(new String[0]);
+			userToLogin.login();
+		}
+		clientSession.setUser(userToLogin);
+		return "ok";
+	}
+	
+	private void logoutFromOtherSessions(String username) {
+		for(UserClient session : server.getClients()) {
+			if(session != clientSession) {
+				User user = session.getUser();
+				if(user != null && user.getUsername().equals(username)) {
+					new LogoutCommand(session).execute(new String[0]);
 				}
 			}
 		}
-		
-		if(user != user1) { // already logged in, logging in with a different user
-			if(user1 != null) 
-				new LogoutCommand(clientSession).execute(new String[0]);
-			user.login();
-		}
-		
-		clientSession.setUser(user);
-		return "ok";
 	}
 }
