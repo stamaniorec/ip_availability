@@ -1,0 +1,20 @@
+class ListAbsentCommand extends Command {
+
+	public ListAbsentCommand(UserClient clientSession) {
+		super(clientSession);
+	}
+
+	@Override
+	public String execute(String[] args) {
+		if (clientSession.getUser() == null) {
+			return "error:notlogged";
+		}
+		String result = "ok";
+		for (User user : clientSession.getServer().getUsers().values()) {
+			if (!user.isLoggedin())
+				result += (":" + user.getUsername());
+		}
+		return result;
+	}
+
+}
