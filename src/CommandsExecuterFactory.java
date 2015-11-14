@@ -1,21 +1,25 @@
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+
 class CommandsExecuterFactory {
 	
-	public static Command getCommand(String inputLine, UserClient clientSession) {
+	private static Map<String, Class<?>> nameToCommandMap;
+	
+	static {
+		nameToCommandMap = new HashMap<String, Class<?>>();
+		nameToCommandMap.put("login", LoginCommand.class);
+		nameToCommandMap.put("logout", LogoutCommand.class);
+		nameToCommandMap.put("info", InfoCommand.class);
+		nameToCommandMap.put("listavailable", ListAvailableCommand.class);
+		nameToCommandMap.put("listabsent", ListAbsentCommand.class);
+		nameToCommandMap.put("shutdown", ShutdownCommand.class);
+	}
+	
+	public static Command getCommand(String inputLine, UserClient clientSession) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		String commandName = inputLine.split(":")[0];
-		if ("shutdown".equals(commandName)) {
-			return new ShutdownCommand(clientSession);
-		} else if ("listavailable".equals(commandName)) {
-			return new ListAvailableCommand(clientSession);
-		} else if ("listabsent".equals(commandName)) {
-			return new ListAbsentCommand(clientSession);
-		} else if ("logout".equals(commandName)) {
-			return new LogoutCommand(clientSession);
-		} else if ("login".equals(commandName)) {
-			return new LoginCommand(clientSession);
-		} else if ("info".equals(commandName)) {
-			return new InfoCommand(clientSession);
-		}
-		return null;
+		return (Command) nameToCommandMap.get(commandName).
+				getConstructor(UserClient.class).newInstance(clientSession);
 	}
 	
 }

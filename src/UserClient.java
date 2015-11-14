@@ -40,15 +40,16 @@ public class UserClient implements Runnable {
 	}
 	
 	private void parse(String line) throws IOException {
-		Command command = CommandsExecuterFactory.getCommand(line, this);
-		if(command == null) {
-			out.println("error:unknowncommand");
-		} else {
+		Command command;
+		try {
+			command = CommandsExecuterFactory.getCommand(line, this);
 			String output = command.execute(line.split(":"));
 			if(command instanceof ShutdownCommand && "ok".equals(output)) {
 				server.stopRunning();
 			}
 			out.println(output);
+		} catch (Exception e) {
+			out.println("error:unknowncommand");
 		}
 	}
 	
