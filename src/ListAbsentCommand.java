@@ -1,15 +1,11 @@
-class ListAbsentCommand extends Command {
+class ListAbsentCommand extends ListReturningCommand {
 
 	public ListAbsentCommand(UserClient clientSession) {
 		super(clientSession);
 	}
 
 	@Override
-	public String execute(String[] args) {
-		if (clientSession.getUser() == null) {
-			return "error:notlogged";
-		}
-		
+	public String buildReturnString(String[] args) {
 		String result = "ok";
 		for (User user : clientSession.getServer().getUsers().values()) {
 			if (!user.isLoggedIn())

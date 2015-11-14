@@ -1,31 +1,35 @@
-class InfoCommand extends Command {
+class InfoCommand extends ListReturningCommand {
 
 	public InfoCommand(UserClient clientSession) {
 		super(clientSession);
 	}
 
 	@Override
-	public String execute(String[] args) {
-		User user = clientSession.getUser();
-		if (user == null) {
-			return "error:notlogged";
-		}
+	public String buildReturnString(String[] args) {
 		String username = args[1];
 		User target = clientSession.getServer().getUser(username);
-		String result = "ok:";
-		if (target != null) {
-			result += (target.getUsername() + ":");
-			result += (target.isLoggedIn() + ":");
-			result += (target.getLoginCount());
-			for (Interval i : target.getSessionTimes()) {
-				result += (":" + i.from());
-				if (i.to() != null) {
-					result += (":" + i.to());
-				}
-			}
-		} else {
-			result += (username + ":false:0");
+
+		if(target == null) {
+			return "ok:" + username + ":false:0";
 		}
+		
+		return buildUserString(target);
+	}
+	
+	private String buildUserString(User user) {
+		String result = String.format("ok:%s:%b:%d", 
+			user.getUsername(),
+			user.isLoggedIn(),
+			user.getLoginCount()
+		);
+		
+		for (Interval i : user.getSessionTimes()) {
+			result += (":" + i.from());
+			if (i.to() != null) {
+				result += (":" + i.to());
+			}
+		}
+
 		return result;
 	}
 
