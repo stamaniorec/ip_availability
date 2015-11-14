@@ -33,7 +33,9 @@ public class UserClient implements Runnable {
 			out.println("въведете команда: ");
 			
 			while(in.hasNextLine()) {
-				parse(in.nextLine());
+				synchronized(this) {
+					parse(in.nextLine());
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
