@@ -9,6 +9,8 @@ public class UserClient implements Runnable {
 	private final Server server;
 	private final Socket socket;
 	private User user;
+	private Scanner in;
+	private PrintStream out;
 	
 	public UserClient(Server server, Socket socket) {
 		this.server = server;
@@ -18,42 +20,43 @@ public class UserClient implements Runnable {
 	
 	@Override
 	public void run() {
-		PrintStream out = null;
-		Scanner in = null;
 		try {
-			out = new PrintStream(socket.getOutputStream());
-			in = new Scanner(socket.getInputStream());
-			
+			initIO();
 			out.println("въведете команда: ");
 			
 			while(in.hasNextLine()) {
-				String line = in.nextLine();
-				
-//				CommandsExecuterFactory f = new CommandsExecuterFactory(this);
-				Command command = CommandsExecuterFactory.getCommand(line, this);
-				if(command instanceof ShutdownCommand) {
-					String output = command.execute(line.split(":"));
-					if("ok".equals(output)) {
-						server.stopRunning();
-						break;
-					} else {
-						out.println(output);
-					}
-				} else {
-					if(command != null) {
-						out.println(command.execute(line.split(":")));
-					} else {
-						out.println("error:unknowncommand");
-					}
-				}
+				parse(in.nextLine());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(in != null) in.close();
-			if(out != null) out.close();
-			new LogoutCommand(this).execute(new String[0]); // if connection has fallen apart, logout automatically
+			cleanup();
 		}
+	}
+	
+	private void initIO() throws IOException {
+		out = new PrintStream(socket.getOutputStream());
+		in = new Scanner(socket.getInputStream());
+	}
+	
+	private void parse(String line) throws IOException {
+		Command command = CommandsExecuterFactory.getCommand(line, this);
+		if(command == null) {
+			out.println("error:unknowncommand");
+		} else {
+			String output = command.execute(line.split(":"));
+			if(command instanceof ShutdownCommand && "ok".equals(output)) {
+				server.stopRunning();
+			}
+			out.println(output);
+		}
+	}
+	
+	private void cleanup() {
+		if(in != null) in.close();
+		if(out != null) out.close();
+		// if connection has fallen apart, logout automatically
+		new LogoutCommand(this).execute(new String[0]);
 	}
 	
 	public synchronized User getUser() { return user; }
