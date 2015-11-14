@@ -15,7 +15,7 @@ class InfoCommand extends Command {
 		String result = "ok:";
 		if (target != null) {
 			result += (target.getUsername() + ":");
-			result += (target.isLoggedin() + ":");
+			result += (target.isLoggedIn() + ":");
 			result += (target.getLoginCount());
 			for (Interval i : target.getSessionTimes()) {
 				result += (":" + i.from());

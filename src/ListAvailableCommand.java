@@ -9,9 +9,10 @@ class ListAvailableCommand extends Command {
 		if (clientSession.getUser() == null) {
 			return "error:notlogged";
 		}
+		
 		String result = "ok";
 		for (User user : clientSession.getServer().getUsers().values()) {
-			if (user.isLoggedin())
+			if (user.isLoggedIn())
 				result += (":" + user.getUsername());
 		}
 		return result;

@@ -27,7 +27,7 @@ public class User {
 		session_times.get(session_times.size()-1).setTo(new Date());
 	}
 	
-	public boolean isLoggedin() { return isLoggedIn; }
+	public boolean isLoggedIn() { return isLoggedIn; }
 	public int getLoginCount() { return loginCount; }
 	public void setLoginCount(int loginCount) { this.loginCount = loginCount; }
 	public String getUsername() { return username; }

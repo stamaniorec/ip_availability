@@ -10,8 +10,10 @@ class LogoutCommand extends Command {
 		if(user == null) {
 			return "error:notlogged";
 		}
+
 		user.logout();
 		clientSession.setUser(null);
+
 		return "ok";
 	}
 	
